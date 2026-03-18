@@ -2,6 +2,8 @@
 
 > Kalkulator gaji Malaysia yang mengira KWSP, SOCSO, EIS, PCB/MTD dan Zakat Pendapatan secara tepat dan pantas. Boleh dipasang sebagai Progressive Web App (PWA).
 
+🔗 **[Buka Aplikasi — muhamaddarulhadi.github.io/Malaysia-Salary-And-Zakat-Calculator](https://muhamaddarulhadi.github.io/Malaysia-Salary-And-Zakat-Calculator/)**
+
 ---
 
 ## 📋 Kandungan
