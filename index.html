@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="ms" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#c8521a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Kira Gaji">
+<meta name="description" content="Kalkulator gaji Malaysia – KWSP, SOCSO, EIS, PCB, Zakat">
+<title>Kira Gaji — Malaysian Salary Calculator</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" type="image/x-icon" href="./favicon.ico">
+<script>
+  // Apply saved theme BEFORE render to avoid flash
+  (function() {
+    var t = localStorage.getItem('kiragaji-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<style>
+/* ===== SELECT2 THEME ===== */
+.select2-container{width:100%!important}
+.select2-container--default .select2-selection--single{
+  background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  height:40px;display:flex;align-items:center;padding:0 12px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--text);
+  transition:border-color .2s,box-shadow .2s;outline:none;
+}
+.select2-container--default.select2-container--open .select2-selection--single,
+.select2-container--default .select2-selection--single:focus{
+  border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,82,26,.12);
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered{
+  color:var(--text);line-height:normal;padding:0;font-size:14px;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow{
+  height:38px;right:8px;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow b{
+  border-color:var(--text3) transparent transparent transparent;
+}
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b{
+  border-color:transparent transparent var(--text3) transparent;
+}
+.select2-dropdown{
+  background:var(--card);border:1.5px solid var(--accent);border-radius:var(--radius-sm);
+  box-shadow:var(--shadow);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;
+  z-index:9999;
+}
+.select2-container--default .select2-search--dropdown .select2-search__field{
+  background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;padding:6px 10px;
+  outline:none;
+}
+.select2-container--default .select2-search--dropdown .select2-search__field:focus{
+  border-color:var(--accent);
+}
+.select2-results__option{
+  padding:8px 12px;color:var(--text2);font-size:13px;
+}
+.select2-container--default .select2-results__option--highlighted[aria-selected]{
+  background:var(--accent);color:#fff;
+}
+.select2-container--default .select2-results__option[aria-selected=true]{
+  background:var(--accent-bg);color:var(--accent);font-weight:700;
+}
+.select2-results__options{max-height:220px;overflow-y:auto;}
+</style>
+<style>
+:root {
+  --bg:#f0ece4;--bg2:#e8e3d9;--card:#fff;--card2:#f7f4ef;
+  --border:#d8d2c6;--text:#1a1714;--text2:#5c5650;--text3:#9b948a;
+  --accent:#c8521a;--accent2:#e8a87c;--accent-bg:#fdf0e8;
+  --green:#2d7a4f;--green-bg:#e8f5ee;--blue:#1a5c8a;--blue-bg:#e6f0f8;
+  --purple:#5c3a8a;--purple-bg:#f0eaf8;--red:#8a1a1a;--red-bg:#f8e6e6;
+  --shadow:0 2px 12px rgba(0,0,0,.08);--radius:16px;--radius-sm:10px;
+}
+[data-theme="dark"] {
+  --bg:#111010;--bg2:#1a1917;--card:#1f1e1c;--card2:#252320;
+  --border:#333028;--text:#f0ece4;--text2:#b8b0a4;--text3:#6b6560;
+  --accent:#e8703a;--accent-bg:#2a1f16;
+  --green:#4aaa72;--green-bg:#142a1e;--blue:#4a8ec8;--blue-bg:#111e2a;
+  --purple:#9a6ae8;--purple-bg:#1e162a;--red:#e85050;--red-bg:#2a1212;
+  --shadow:0 2px 12px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;border-radius:10px;overflow:hidden}
+.logo-icon img{width:100%;height:100%;object-fit:cover}
+.logo-text{font-size:18px;font-weight:800;letter-spacing:-.5px}
+.logo-sub{font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.5px}
+.header-right{display:flex;align-items:center;gap:10px}
+.pwa-btn{background:var(--accent-bg);border:1px solid var(--accent);color:var(--accent);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:11px;font-weight:700;display:none;align-items:center;gap:5px;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
+.pwa-btn:hover{background:var(--accent);color:#fff}
+.theme-toggle{background:var(--card2);border:1px solid var(--border);border-radius:50px;padding:5px;cursor:pointer;display:flex;gap:3px;align-items:center}
+.theme-btn{width:30px;height:26px;border-radius:50px;border:none;cursor:pointer;font-size:13px;background:transparent;color:var(--text3);transition:all .2s;display:flex;align-items:center;justify-content:center}
+.theme-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.main{max-width:1160px;margin:0 auto;padding:24px 16px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:800px){.main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);transition:background .3s,border-color .3s;margin-bottom:14px}
+.card:last-child{margin-bottom:0}
+.card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title span{font-size:15px}
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text2);margin-bottom:5px}
+.field input,.field select{width:100%;padding:10px 12px;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--text);transition:border-color .2s,box-shadow .2s;outline:none;-webkit-appearance:none}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,82,26,.12)}
+.field input[type="number"]{font-family:'DM Mono',monospace}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-hint{font-size:10px;color:var(--text3);margin-top:3px;line-height:1.4}
+.radio-group{display:flex;gap:6px;flex-wrap:wrap}
+.radio-btn{flex:1;min-width:60px;padding:8px 10px;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;text-align:center;font-size:12px;font-weight:600;color:var(--text2);transition:all .2s;user-select:none}
+.radio-btn:hover{border-color:var(--accent2);color:var(--accent)}
+.radio-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none;padding-bottom:0}
+.toggle-row:first-child{padding-top:0}
+.toggle-label{font-size:13px;font-weight:600;color:var(--text2)}
+.toggle-desc{font-size:10px;color:var(--text3);margin-top:2px}
+.toggle{width:42px;height:24px;background:var(--border);border-radius:50px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on{background:var(--accent)}
+.toggle.on::after{transform:translateX(18px)}
+.sep{height:1px;background:var(--border);margin:10px 0}
+.item-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.item-row{display:flex;gap:6px;align-items:center}
+.item-row .iname{flex:1.5;font-size:12px;padding:9px 10px;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);outline:none;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .2s;width:0}
+.item-row .iamt{flex:1;font-family:'DM Mono',monospace;padding:9px 10px;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);outline:none;font-size:13px;transition:border-color .2s;width:0}
+.item-row .iname:focus,.item-row .iamt:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,82,26,.12)}
+.btn-rm{background:var(--red-bg);border:1px solid var(--red);color:var(--red);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;padding:0;line-height:1}
+.btn-rm:hover{background:var(--red);color:#fff}
+.btn-add{background:var(--green-bg);border:1px solid var(--green);color:var(--green);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px;transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif}
+.btn-add:hover{background:var(--green);color:#fff}
+/* Results */
+.results-col{display:flex;flex-direction:column;gap:14px}
+.salary-hero{background:linear-gradient(135deg,#c8521a 0%,#e8703a 100%);border-radius:var(--radius);padding:22px;color:#fff;position:relative;overflow:hidden}
+.salary-hero::before{content:'';position:absolute;width:200px;height:200px;background:rgba(255,255,255,.06);border-radius:50%;top:-80px;right:-60px;pointer-events:none}
+.hero-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.75}
+.hero-amount{font-size:36px;font-weight:800;letter-spacing:-2px;margin:3px 0 2px;font-family:'DM Mono',monospace}
+.hero-desc{font-size:11px;opacity:.7}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.hero-mini{background:rgba(255,255,255,.12);border-radius:9px;padding:10px 12px}
+.hero-mini-label{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.7}
+.hero-mini-val{font-size:14px;font-weight:800;font-family:'DM Mono',monospace;margin-top:2px}
+/* Chart card */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.chart-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.chart-wrap{position:relative;height:220px}
+.chart-legend{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:14px}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text2)}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.legend-val{font-family:'DM Mono',monospace;font-weight:700;color:var(--text);font-size:11px;margin-left:auto}
+/* Deduction cards */
+.dc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.dc-head{padding:12px 15px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.dc-badge{display:flex;align-items:center;gap:8px}
+.dc-dot{width:9px;height:9px;border-radius:50%}
+.dc-name{font-size:13px;font-weight:700}
+.dc-sub{font-size:10px;color:var(--text3);font-weight:500}
+.dc-amt{font-size:18px;font-weight:800;font-family:'DM Mono',monospace}
+.dc-body{padding:11px 15px}
+.dr{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.dr-label{font-size:11px;color:var(--text2);font-weight:500;display:flex;align-items:center;gap:6px}
+.dr-val{font-size:12px;font-weight:700;font-family:'DM Mono',monospace}
+.dr-note{font-size:10px;color:var(--text3);font-style:italic;padding:4px 0;line-height:1.5}
+/* Zakat */
+.zakat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.zakat-head{background:linear-gradient(135deg,#5c3a8a 0%,#7a4ac8 100%);padding:13px 15px;color:#fff}
+.zakat-head-title{font-size:13px;font-weight:700}
+.zakat-head-sub{font-size:10px;opacity:.7;margin-top:1px}
+.zakat-body{padding:13px 15px}
+.zakat-notice{border-radius:var(--radius-sm);padding:9px 11px;font-size:11px;margin-bottom:11px;display:flex;gap:7px;align-items:flex-start;line-height:1.5}
+.zakat-notice.info{background:var(--purple-bg);border:1px solid rgba(92,58,138,.2);color:var(--purple)}
+.zakat-notice.ok{background:var(--green-bg);border:1px solid rgba(45,122,79,.2);color:var(--green)}
+.zakat-boxes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.zakat-box{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px}
+.zakat-box-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)}
+.zakat-box-val{font-size:20px;font-weight:800;font-family:'DM Mono',monospace;color:var(--purple);margin-top:3px}
+.zakat-box-desc{font-size:10px;color:var(--text3);margin-top:2px}
+.zakat-calc{margin-top:9px;font-size:10px;color:var(--text3);line-height:1.6;border-top:1px solid var(--border);padding-top:8px}
+.zakat-nil{text-align:center;padding:16px;color:var(--text3);font-size:12px}
+/* Summary */
+.sum-bar{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 17px}
+.sum-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:10px}
+.sum-item{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.sum-label{font-size:12px;color:var(--text2);display:flex;gap:7px;align-items:center}
+.sum-dot{width:7px;height:7px;border-radius:50%}
+.sum-val{font-size:12px;font-weight:700;font-family:'DM Mono',monospace}
+.sum-item.sub .sum-label{padding-left:14px;font-size:11px}
+.sum-item.sub .sum-val{font-size:11px}
+.sum-div{height:1px;background:var(--border);margin:5px 0}
+.sum-total .sum-label{font-weight:800;color:var(--text);font-size:13px}
+.sum-total .sum-val{color:var(--accent);font-size:13px}
+.info-tag{display:inline-block;background:var(--accent-bg);color:var(--accent);font-size:9px;font-weight:700;padding:2px 6px;border-radius:50px}
+.status-tag{display:inline-flex;align-items:center;font-size:9px;font-weight:700;padding:2px 7px;border-radius:50px;margin-left:4px}
+.tag-on{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(26,92,138,.2)}
+.tag-off{background:var(--bg2);color:var(--text3);border:1px solid var(--border)}
+.disclaimer{grid-column:1/-1;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:10px;color:var(--text3);line-height:1.6;text-align:center}
+footer{background:var(--card);border-top:1px solid var(--border);padding:18px 24px;text-align:center;margin-top:0}
+.footer-inner{max-width:1160px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.footer-text{font-size:12px;color:var(--text3)}
+.footer-link{display:inline-flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;font-size:12px;font-weight:700;padding:5px 12px;border:1.5px solid var(--accent);border-radius:50px;transition:all .2s}
+.footer-link:hover{background:var(--accent);color:#fff}
+.footer-link svg{width:14px;height:14px;fill:currentColor;flex-shrink:0}
+.c-epf{color:#2d7a4f} .c-soc{color:#1a5c8a} .c-pcb{color:#8a1a1a} .c-zakat{color:#5c3a8a}
+.d-epf{background:#2d7a4f} .d-soc{background:#1a5c8a} .d-pcb{background:#8a1a1a} .d-zakat{background:#5c3a8a} .d-net{background:#c8521a}
+select option{background:var(--card);color:var(--text)}
+.fade-in{animation:fup .35s ease both}
+@keyframes fup{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+/* Install toast */
+.install-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:12px 20px;border-radius:50px;font-size:12px;font-weight:600;display:none;align-items:center;gap:10px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.2);white-space:nowrap}
+.install-toast button{background:var(--accent);color:#fff;border:none;border-radius:50px;padding:5px 14px;cursor:pointer;font-size:11px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon"><img src="./icon-192.png" alt="Kira Gaji"></div>
+    <div>
+      <div class="logo-text">Kira Gaji</div>
+      <div class="logo-sub">Malaysian Salary Calculator</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="pwa-btn" id="install-btn" onclick="installPWA()" style="display:flex">⬇ Install App</button>
+    <div class="theme-toggle">
+      <button class="theme-btn active" id="btn-light" onclick="setTheme('light')">☀️</button>
+      <button class="theme-btn" id="btn-dark" onclick="setTheme('dark')">🌙</button>
+    </div>
+  </div>
+</header>
+
+<div class="main">
+<!-- ===== LEFT ===== -->
+<div>
+
+<div class="card fade-in">
+  <div class="card-title"><span>💼</span> Maklumat Gaji</div>
+  <div class="field">
+    <label>Gaji Pokok (Basic Salary)</label>
+    <input type="number" id="salary" placeholder="cth: 4100.00" min="0" step="100" oninput="calc()">
+  </div>
+  <div class="field">
+    <label>Elaun &amp; Pendapatan Tambahan</label>
+    <div class="item-list" id="elaun-list"></div>
+    <button class="btn-add" onclick="addElaun()">＋ Tambah Elaun</button>
+    <div class="field-hint">Semua elaun dicampur dengan gaji pokok = Jumlah Pendapatan Kasar.</div>
+  </div>
+  <div class="sep"></div>
+  <div class="dr">
+    <div class="dr-label" style="font-weight:700;color:var(--text);font-size:12px">Jumlah Pendapatan Kasar</div>
+    <div class="dr-val" id="gross-display" style="color:var(--accent);font-size:14px">RM 0.00</div>
+  </div>
+</div>
+
+<div class="card fade-in">
+  <div class="card-title"><span>👤</span> Profil Pekerja &amp; KWSP</div>
+  <div class="field">
+    <label>Kewarganegaraan</label>
+    <div class="radio-group" id="citizen-grp">
+      <div class="radio-btn active" data-v="citizen" onclick="setCitizen(this)">Warganegara</div>
+      <div class="radio-btn" data-v="pr" onclick="setCitizen(this)">PR Malaysia</div>
+      <div class="radio-btn" data-v="foreign" onclick="setCitizen(this)">Asing</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>Umur Pekerja</label>
+    <div class="radio-group" id="age-grp">
+      <div class="radio-btn active" data-v="below60" onclick="setAge(this)">Di bawah 60</div>
+      <div class="radio-btn" data-v="above60" onclick="setAge(this)">60 &amp; ke atas</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>Pilihan Kadar KWSP Pekerja</label>
+    <div class="radio-group" id="epf-opt-grp">
+      <div class="radio-btn active" data-v="std" onclick="setEpfOpt(this)">Standard</div>
+      <div class="radio-btn" data-v="red" onclick="setEpfOpt(this)">Dikurangkan</div>
+      <div class="radio-btn" data-v="zero" onclick="setEpfOpt(this)">Dikecualikan</div>
+    </div>
+    <div class="field-hint" id="epf-hint"></div>
+  </div>
+</div>
+
+<div class="card fade-in">
+  <div class="card-title"><span>🛡️</span> Tetapan PERKESO</div>
+  <div class="toggle-row">
+    <div>
+      <div class="toggle-label">SOCSO (Akta 4)</div>
+      <div class="toggle-desc">Skim Bencana Pekerjaan + Skim Keilatan</div>
+    </div>
+    <button class="toggle on" id="tog-socso" onclick="togSocso()"></button>
+  </div>
+  <div class="toggle-row">
+    <div>
+      <div class="toggle-label">EIS / SIP (Akta 800)</div>
+      <div class="toggle-desc">Sistem Insurans Pekerjaan – ceiling RM4,000</div>
+    </div>
+    <button class="toggle on" id="tog-eis" onclick="togEis()"></button>
+  </div>
+</div>
+
+<div class="card fade-in">
+  <div class="card-title"><span>📋</span> Tetapan PCB / MTD</div>
+  <div class="field">
+    <label>Status Perkahwinan</label>
+    <select id="marital" onchange="calc()">
+      <option value="single">Bujang (Single)</option>
+      <option value="married_both">Berkahwin – Pasangan Bekerja</option>
+      <option value="married_alone">Berkahwin – Pasangan Tidak Bekerja</option>
+    </select>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label>Anak (bawah 18)</label>
+      <input type="number" id="children" value="0" min="0" max="20" oninput="calc()">
+    </div>
+    <div class="field">
+      <label>Anak OKU</label>
+      <input type="number" id="childrenOku" value="0" min="0" max="20" oninput="calc()">
+    </div>
+  </div>
+</div>
+
+<div class="card fade-in">
+  <div class="card-title"><span>➖</span> Potongan Lain-lain</div>
+  <div class="item-list" id="potongan-list"></div>
+  <button class="btn-add" onclick="addPotongan()">＋ Tambah Potongan</button>
+  <div class="field-hint" style="margin-top:6px">Cth: PTPTN, pinjaman bank. Tidak mempengaruhi KWSP/SOCSO/PCB/Zakat.</div>
+</div>
+
+<div class="card fade-in">
+  <div class="card-title"><span>🌙</span> Tetapan Zakat Pendapatan</div>
+  <div class="toggle-row" style="padding-bottom:12px">
+    <div>
+      <div class="toggle-label">Kira Zakat Pendapatan?</div>
+      <div class="toggle-desc">Aktifkan untuk mengira zakat pendapatan</div>
+    </div>
+    <button class="toggle on" id="tog-zakat-calc" onclick="togZakatCalc()"></button>
+  </div>
+  <div id="zakat-negeri-field" style="margin-top:16px;margin-bottom:16px">
+    <div class="field">
+      <label>Negeri (Pihak Berkuasa Zakat)</label>
+      <select id="state" onchange="calc()">
+      <option value="selangor">Selangor (LZS)</option>
+      <option value="kl">W.P. Kuala Lumpur (MAIWP)</option>
+      <option value="putrajaya">W.P. Putrajaya (MAIWP)</option>
+      <option value="labuan">W.P. Labuan (MZWPL)</option>
+      <option value="johor">Johor (MZAJ)</option>
+      <option value="kedah">Kedah</option>
+      <option value="kelantan">Kelantan (MAIK)</option>
+      <option value="melaka">Melaka</option>
+      <option value="ns">Negeri Sembilan (MAINS)</option>
+      <option value="pahang">Pahang (PAIP)</option>
+      <option value="penang">Pulau Pinang (MAINPP)</option>
+      <option value="perak">Perak (MAIAMP)</option>
+      <option value="perlis">Perlis (MAIPs)</option>
+      <option value="sabah">Sabah (MUIS)</option>
+      <option value="sarawak">Sarawak (Baitulmal)</option>
+      <option value="terengganu">Terengganu (MAIDAM)</option>
+    </select>
+    </div>
+  </div>
+  <div id="zakat-muslim-section" style="margin-top:4px;margin-bottom:4px">
+  <div class="toggle-row">
+    <div>
+      <div class="toggle-label">Beragama Islam (Muslim)?</div>
+      <div class="toggle-desc">Zakat pendapatan wajib bagi Muslim</div>
+    </div>
+    <button class="toggle on" id="tog-muslim" onclick="togMuslim()"></button>
+  </div>
+  </div>
+  <div id="zakat-opts">
+    <div class="sep"></div>
+    <div class="field-row">
+      <div class="field">
+        <label>Nisab <span class="info-tag">RM / tahun</span></label>
+        <input type="number" id="nisab" value="8200" min="0" step="100" oninput="calc()">
+        <div class="field-hint">Semak nilai terkini dengan pihak berkuasa zakat negeri anda.</div>
+      </div>
+      <div class="field">
+        <label>Kadar Zakat <span class="info-tag">%</span></label>
+        <input type="number" id="zakatRate" value="2.5" min="0" max="10" step="0.1" oninput="calc()">
+        <div class="field-hint">Lazimnya 2.5%.</div>
+      </div>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Tolak KWSP dari asas zakat?</div>
+        <div class="toggle-desc">Dibenarkan oleh sesetengah negeri</div>
+      </div>
+      <button class="toggle on" id="tog-depf" onclick="togDepf()"></button>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Tolak PERKESO dari asas zakat?</div>
+        <div class="toggle-desc">Potongan SOCSO + EIS</div>
+      </div>
+      <button class="toggle" id="tog-dsoc" onclick="togDsoc()"></button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end left -->
+
+<!-- ===== RIGHT ===== -->
+<div class="results-col">
+
+  <div class="salary-hero fade-in">
+    <div class="hero-label">Gaji Bersih (Take-Home Pay)</div>
+    <div class="hero-amount" id="net-salary">RM 0.00</div>
+    <div class="hero-desc">selepas semua potongan wajib</div>
+    <div class="hero-grid">
+      <div class="hero-mini">
+        <div class="hero-mini-label">Pendapatan Kasar</div>
+        <div class="hero-mini-val" id="h-gross">RM 0.00</div>
+      </div>
+      <div class="hero-mini">
+        <div class="hero-mini-label">Potongan Wajib</div>
+        <div class="hero-mini-val" id="h-mandatory">RM 0.00</div>
+      </div>
+      <div class="hero-mini">
+        <div class="hero-mini-label">Potongan Lain</div>
+        <div class="hero-mini-val" id="h-other">RM 0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="chart-card fade-in">
+    <div class="chart-title"><span>📊</span> Pecahan Gaji Bulanan</div>
+    <div class="chart-wrap">
+      <canvas id="salaryChart"></canvas>
+    </div>
+    <div class="chart-legend" id="chart-legend"></div>
+  </div>
+
+  <!-- KWSP -->
+  <div class="dc fade-in">
+    <div class="dc-head">
+      <div class="dc-badge">
+        <div class="dc-dot d-epf"></div>
+        <div><div class="dc-name c-epf">KWSP / EPF</div><div class="dc-sub">Kumpulan Wang Simpanan Pekerja</div></div>
+      </div>
+      <div class="dc-amt c-epf" id="kwsp-emp-h">RM 0.00</div>
+    </div>
+    <div class="dc-body">
+      <div class="dr"><div class="dr-label">Syer Pekerja</div><div class="dr-val" id="kwsp-emp">RM 0.00</div></div>
+      <div class="dr"><div class="dr-label">Syer Majikan</div><div class="dr-val" id="kwsp-emplr">RM 0.00</div></div>
+      <div class="dr"><div class="dr-label">Kadar Pekerja / Majikan</div><div class="dr-val" id="kwsp-rate">— / —</div></div>
+      <div class="dr"><div class="dr-label">Jumlah Caruman (Pekerja+Majikan)</div><div class="dr-val" id="kwsp-total">RM 0.00</div></div>
+    </div>
+  </div>
+
+  <!-- PERKESO -->
+  <div class="dc fade-in">
+    <div class="dc-head">
+      <div class="dc-badge">
+        <div class="dc-dot d-soc"></div>
+        <div><div class="dc-name c-soc">PERKESO</div><div class="dc-sub">SOCSO (Akta 4) + EIS (Akta 800)</div></div>
+      </div>
+      <div class="dc-amt c-soc" id="perkeso-emp-h">RM 0.00</div>
+    </div>
+    <div class="dc-body">
+      <div class="dr">
+        <div class="dr-label">SOCSO – Syer Pekerja <span id="socso-tag" class="status-tag tag-on">Aktif</span></div>
+        <div class="dr-val" id="socso-emp">RM 0.00</div>
+      </div>
+      <div class="dr"><div class="dr-label">SOCSO – Syer Majikan</div><div class="dr-val" id="socso-emplr">RM 0.00</div></div>
+      <div class="dr">
+        <div class="dr-label">EIS – Syer Pekerja <span id="eis-tag" class="status-tag tag-on">Aktif</span></div>
+        <div class="dr-val" id="eis-emp">RM 0.00</div>
+      </div>
+      <div class="dr"><div class="dr-label">EIS – Syer Majikan</div><div class="dr-val" id="eis-emplr">RM 0.00</div></div>
+      <div class="dr-note" id="socso-note"></div>
+    </div>
+  </div>
+
+  <!-- PCB -->
+  <div class="dc fade-in">
+    <div class="dc-head">
+      <div class="dc-badge">
+        <div class="dc-dot d-pcb"></div>
+        <div><div class="dc-name c-pcb">PCB / MTD</div><div class="dc-sub">Potongan Cukai Bulanan – LHDN 2024</div></div>
+      </div>
+      <div class="dc-amt c-pcb" id="pcb-monthly">RM 0.00</div>
+    </div>
+    <div class="dc-body">
+      <div class="dr"><div class="dr-label">Pendapatan Bercukai (Tahunan)</div><div class="dr-val" id="pcb-tax-a">RM 0.00</div></div>
+      <div class="dr"><div class="dr-label">Cukai Pendapatan Tahunan</div><div class="dr-val" id="pcb-annual">RM 0.00</div></div>
+      <div class="dr"><div class="dr-label">PCB Bulanan (÷12)</div><div class="dr-val" id="pcb-monthly2">RM 0.00</div></div>
+      <div class="dr"><div class="dr-label">Kadar Efektif</div><div class="dr-val" id="pcb-eff">0.00%</div></div>
+      <div class="dr-note" id="pcb-relief-note"></div>
+      <div id="pcb-below10-notice" style="display:none;margin-top:10px;padding:10px 12px;border-radius:9px;font-size:11px;line-height:1.6;background:var(--accent-bg);border:1px solid rgba(200,82,26,.25);color:var(--accent)">
+        <div style="font-weight:700;margin-bottom:5px">⚠️ PCB Bulanan Kurang Daripada RM10</div>
+        <div style="margin-bottom:8px">Mengikut Peraturan LHDN, majikan <b>tidak diwajibkan</b> memotong PCB bulanan jika amaun kurang daripada <b>RM10</b>. Namun cukai tetap perlu dibayar semasa mengemukakan Borang BE tahunan.</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 11px;gap:10px">
+          <div>
+            <div style="font-weight:700;font-size:11px;color:var(--text)">Potong PCB Bulanan Walaupun &lt; RM10?</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px" id="pcb-force-desc">Tidak — ikut peraturan LHDN (tiada potongan bulanan)</div>
+          </div>
+          <button class="toggle" id="tog-force-pcb" onclick="togForcePcb()" style="flex-shrink:0"></button>
+        </div>
+      </div>
+      <div id="pcb-threshold-note" style="display:none;margin-top:8px;padding:9px 11px;border-radius:8px;font-size:11px;line-height:1.6;background:var(--green-bg);border:1px solid rgba(45,122,79,.2);color:var(--green)"></div>
+    </div>
+  </div>
+
+  <!-- ZAKAT -->
+  <div class="zakat-card fade-in">
+    <div class="zakat-head">
+      <div class="zakat-head-title">🌙 Zakat Pendapatan</div>
+      <div class="zakat-head-sub" id="zakat-state-lbl">Pilih negeri di sebelah kiri</div>
+    </div>
+    <div class="zakat-body" id="zakat-body">
+      <div class="zakat-nil">Masukkan gaji untuk mengira zakat.</div>
+    </div>
+  </div>
+
+  <!-- Other deductions -->
+  <div class="dc fade-in" id="other-card" style="display:none">
+    <div class="dc-head">
+      <div class="dc-badge">
+        <div class="dc-dot" style="background:#888"></div>
+        <div><div class="dc-name" style="color:var(--text2)">Potongan Lain-lain</div><div class="dc-sub">Tidak mempengaruhi cukai / zakat</div></div>
+      </div>
+      <div class="dc-amt" style="color:var(--text2)" id="other-total">RM 0.00</div>
+    </div>
+    <div class="dc-body" id="other-body"></div>
+  </div>
+
+  <!-- Summary -->
+  <div class="sum-bar fade-in">
+    <div class="sum-title">📋 Ringkasan Potongan Bulanan</div>
+    <div class="sum-item"><div class="sum-label"><div class="sum-dot d-epf"></div>KWSP – Syer Pekerja</div><div class="sum-val" id="s-kwsp">RM 0.00</div></div>
+    <div class="sum-item sub" id="s-socso-row"><div class="sum-label">SOCSO (Pekerja)</div><div class="sum-val" id="s-socso">RM 0.00</div></div>
+    <div class="sum-item sub" id="s-eis-row"><div class="sum-label">EIS (Pekerja)</div><div class="sum-val" id="s-eis">RM 0.00</div></div>
+    <div class="sum-item"><div class="sum-label"><div class="sum-dot d-pcb"></div>PCB / MTD</div><div class="sum-val" id="s-pcb">RM 0.00</div></div>
+    <div class="sum-item" id="s-zakat-row" style="display:none"><div class="sum-label"><div class="sum-dot d-zakat"></div>Zakat (Bulanan)</div><div class="sum-val" id="s-zakat">RM 0.00</div></div>
+    <div class="sum-div"></div>
+    <div class="sum-item sum-total"><div class="sum-label">Jumlah Potongan Wajib</div><div class="sum-val" id="s-total">RM 0.00</div></div>
+    <div class="sum-item" id="s-other-row" style="display:none;padding-top:3px">
+      <div class="sum-label" style="color:var(--text3);font-size:11px">+ Potongan Lain-lain</div>
+      <div class="sum-val" style="color:var(--text3);font-size:11px" id="s-other">RM 0.00</div>
+    </div>
+  </div>
+
+</div><!-- end right -->
+
+<div class="disclaimer">
+  ⚠️ <b>Kira Gaji</b> adalah alat anggaran sahaja. KWSP berdasarkan Jadual Ketiga (Akta 452). SOCSO berdasarkan Kadar Caruman Akta 4 (jadual tepat). PCB berdasarkan jadual cukai LHDN 2024 dengan relief standard. Nilai nisab zakat berbeza mengikut negeri &amp; semasa. Bukan nasihat kewangan profesional.
+</div>
+
+</div><!-- end main -->
+
+<footer>
+  <div class="footer-inner">
+    <span class="footer-text">Dicipta oleh <strong>M.D.Hadi</strong> &bull; Kira Gaji &copy; 2025</span>
+    <a class="footer-link" href="https://github.com/muhamaddarulhadi" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      muhamaddarulhadi
+    </a>
+  </div>
+</footer>
+
+<div class="install-toast" id="install-toast">
+  📱 Kira Gaji boleh dipasang sebagai app!
+  <button onclick="installPWA()">Pasang</button>
+  <button onclick="dismissToast()" style="background:transparent;color:inherit;border:1px solid rgba(255,255,255,.3)">Nanti</button>
+</div>
+
+<script>
+// ========== ICONS (embedded base64) ==========
+var FAVICON_B64 = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACaUlEQVR4nO2XXUhTYRzGf+dMJ9pC23TTuSIJbwpChGgRIYV9C32sixQDCaGLrvOiqyi8kSDoKpCIPkj7wCwiKCHDCloFmhZCZKasuTZXLpzp5jpd2I7O9m5j2NmNz93z/z/v/3nel3MO55UQ4NVhqyLqpQN7h1uKV/+nuNTGyYLIWprH85BFDa1CyFqbLw4hJxP+b0iZ2P1CZPwElgNkLSSr609jPXQyRqBEZgkH/Ex+fIv77kWCw++Felf7eb7euRCzfm1jM5a9DSofvXaOsfuXVJ70BCRdFnqjBaN9P+ubO8kxrxFqzdV1SLJufnhOLoVVjoTzhQFcbS04HaX0nthE8FOfOnDV5t3CYfpCK/mV21Vu2noAXd7K9AJEERp3E3jXo3JJzoqrC0/4ADDvrFdr5l3HYnppBdCbSsivqJojikKg71lcna/7FgAFlTvQm0rIK9uAobwCFAVf923h/PjbAWy1Tdhqm1QeGnczevUsUyODcfXBoX6CQ/2sWLcRc3Ud2QVmAAIDL5jxfBEGSP01lGVC3z0JJd6uGwAUVddh2nZwrvbkeuKxooarrYU3R8sYuXIGAL2xmPJTrehyDcJh/uedRH5NojcWo8s1EJ7w8eP14/QCAPwOh/A8bOXnwEsAsguKsOw7LtRHpoP4e+6p3Pe0HSUym36AKMYezH84LHsakHTCR4dvXX+PXFHwdt1MOjulABO93Uy7PwPMfZS21Ai1U8MfcDpKcR6xMeMdXZoAKAqeR5dVWlzTmNKyVLD8P7AcQBbdWLSAvcMtZf4Eokm0No56yosLWprHBNAqxGIPoaFW1/M/GMXNUsx6oc0AAAAASUVORK5CYII=';
+var ICON192_B64 = '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';
+var ICON512_B64 = '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';
+
+// ========== SERVICE WORKER ==========
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(function(err) {
+    console.warn('SW registration failed:', err);
+  });
+}
+
+// ========== PWA INSTALL ==========
+var deferredPrompt = null;
+
+// Check if already installed — hide button if running as standalone
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+  document.getElementById('install-btn').style.display = 'none';
+}
+
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-btn').style.display = 'flex';
+  var toast = document.getElementById('install-toast');
+  toast.style.display = 'flex';
+  setTimeout(function() { toast.style.display = 'none'; }, 8000);
+});
+
+window.addEventListener('appinstalled', function() {
+  deferredPrompt = null;
+  document.getElementById('install-btn').style.display = 'none';
+});
+
+function installPWA() {
+  if (!deferredPrompt) {
+    // Already installed or not supported — show friendly message
+    alert('Untuk pasang aplikasi ini:\n• Chrome/Edge: Klik ikon ⊕ di bar alamat\n• iOS Safari: Klik Share → Add to Home Screen');
+    return;
+  }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function(result) {
+    if (result.outcome === 'accepted') {
+      document.getElementById('install-btn').style.display = 'none';
+    }
+    deferredPrompt = null;
+  });
+  dismissToast();
+}
+function dismissToast() { document.getElementById('install-toast').style.display = 'none'; }
+
+// ========== STATE ==========
+var S = {
+  citizen: 'citizen', age: 'below60', epfOpt: 'std',
+  includeSocso: true, includeEis: true,
+  includeZakatCalc: true,
+  muslim: true, deductEpf: true, deductSocso: false,
+  forcePcbBelow10: false,
+  elauns: [], potongan: []
+};
+
+// ========== THEME ==========
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('kiragaji-theme', t);
+  document.getElementById('btn-light').classList.toggle('active', t === 'light');
+  document.getElementById('btn-dark').classList.toggle('active', t === 'dark');
+  if (salaryChart) updateChart(lastResults);
+  // Destroy and re-init Select2 so it picks up new CSS variables
+  if (typeof $ !== 'undefined' && $.fn.select2) {
+    $('#marital').select2('destroy');
+    $('#state').select2('destroy');
+    initSelect2();
+  }
+}
+
+// ========== RADIO HELPERS ==========
+function rSet(grp, el) {
+  document.querySelectorAll('#' + grp + ' .radio-btn').forEach(function(b) { b.classList.remove('active'); });
+  el.classList.add('active');
+}
+function setCitizen(el) { rSet('citizen-grp', el); S.citizen = el.dataset.v; updateHint(); calc(); }
+function setAge(el) { rSet('age-grp', el); S.age = el.dataset.v; updateHint(); calc(); }
+function setEpfOpt(el) { rSet('epf-opt-grp', el); S.epfOpt = el.dataset.v; updateHint(); calc(); }
+
+function updateHint() {
+  var h = document.getElementById('epf-hint');
+  if (S.epfOpt === 'zero') { h.textContent = 'Pekerja tidak caruman KWSP. Majikan tetap caruman.'; return; }
+  if (S.age === 'below60') {
+    h.textContent = S.epfOpt === 'std'
+      ? 'Pekerja 11%. Majikan: 13% (gaji ≤RM5,000) / 12% (>RM5,000).'
+      : 'Pekerja 9%. Majikan: 13% (gaji ≤RM5,000) / 12% (>RM5,000).';
+  } else {
+    if (S.citizen === 'citizen') h.textContent = 'Warganegara 60+: Tiada syer pekerja. Majikan ~4%.';
+    else if (S.citizen === 'pr') h.textContent = S.epfOpt === 'std'
+      ? 'Pekerja 5.5%. Majikan: 6.5% (≤RM5,000) / 6% (>RM5,000).'
+      : 'Pekerja 3%. Majikan: 6.5% (≤RM5,000) / 6% (>RM5,000).';
+    else h.textContent = 'Bukan warganegara 60+: Pekerja 5.5%. Majikan RM5 (flat).';
+  }
+}
+
+// ========== TOGGLES ==========
+function togMuslim() {
+  S.muslim = !S.muslim;
+  document.getElementById('tog-muslim').classList.toggle('on', S.muslim);
+  document.getElementById('zakat-opts').style.display = S.muslim ? '' : 'none';
+  calc();
+}
+function togZakatCalc() {
+  S.includeZakatCalc = !S.includeZakatCalc;
+  document.getElementById('tog-zakat-calc').classList.toggle('on', S.includeZakatCalc);
+  var negeriField = document.getElementById('zakat-negeri-field');
+  var section = document.getElementById('zakat-muslim-section');
+  var opts = document.getElementById('zakat-opts');
+  var zakatCard = document.querySelector('.zakat-card');
+  var zakatSumRow = document.getElementById('s-zakat-row');
+  if (S.includeZakatCalc) {
+    if (negeriField) negeriField.style.display = '';
+    section.style.display = '';
+    opts.style.display = S.muslim ? '' : 'none';
+    if (zakatCard) zakatCard.style.display = '';
+  } else {
+    if (negeriField) negeriField.style.display = 'none';
+    section.style.display = 'none';
+    opts.style.display = 'none';
+    if (zakatCard) zakatCard.style.display = 'none';
+    if (zakatSumRow) zakatSumRow.style.display = 'none';
+  }
+  calc();
+}
+function togDepf() { S.deductEpf = !S.deductEpf; document.getElementById('tog-depf').classList.toggle('on', S.deductEpf); calc(); }
+function togDsoc() { S.deductSocso = !S.deductSocso; document.getElementById('tog-dsoc').classList.toggle('on', S.deductSocso); calc(); }
+function togSocso() {
+  S.includeSocso = !S.includeSocso;
+  document.getElementById('tog-socso').classList.toggle('on', S.includeSocso);
+  var tag = document.getElementById('socso-tag');
+  tag.className = 'status-tag ' + (S.includeSocso ? 'tag-on' : 'tag-off');
+  tag.textContent = S.includeSocso ? 'Aktif' : 'Tidak Aktif';
+  calc();
+}
+function togEis() {
+  S.includeEis = !S.includeEis;
+  document.getElementById('tog-eis').classList.toggle('on', S.includeEis);
+  var tag = document.getElementById('eis-tag');
+  tag.className = 'status-tag ' + (S.includeEis ? 'tag-on' : 'tag-off');
+  tag.textContent = S.includeEis ? 'Aktif' : 'Tidak Aktif';
+  calc();
+}
+function togForcePcb() {
+  S.forcePcbBelow10 = !S.forcePcbBelow10;
+  document.getElementById('tog-force-pcb').classList.toggle('on', S.forcePcbBelow10);
+  calc();
+}
+
+// ========== ELAUN ==========
+function addElaun() { S.elauns.push({ id: Date.now(), name: '', amount: 0 }); renderElaun(); }
+function removeElaun(id) { S.elauns = S.elauns.filter(function(e) { return e.id !== id; }); renderElaun(); calc(); }
+function renderElaun() {
+  var list = document.getElementById('elaun-list'); list.innerHTML = '';
+  S.elauns.forEach(function(e) {
+    var d = document.createElement('div'); d.className = 'item-row';
+    d.innerHTML = '<input class="iname" type="text" placeholder="Nama elaun" value="' + e.name + '" oninput="updateElaunN(' + e.id + ',this.value)">' +
+      '<input class="iamt" type="number" placeholder="0.00" value="' + (e.amount || '') + '" min="0" step="50" oninput="updateElaunA(' + e.id + ',this.value)">' +
+      '<button class="btn-rm" onclick="removeElaun(' + e.id + ')">&#x00D7;</button>';
+    list.appendChild(d);
+  });
+}
+function updateElaunN(id, v) { var e = S.elauns.find(function(x) { return x.id === id; }); if (e) e.name = v; }
+function updateElaunA(id, v) { var e = S.elauns.find(function(x) { return x.id === id; }); if (e) { e.amount = parseFloat(v) || 0; calc(); } }
+
+// ========== POTONGAN ==========
+function addPotongan() { S.potongan.push({ id: Date.now(), name: '', amount: 0 }); renderPotongan(); }
+function removePotongan(id) { S.potongan = S.potongan.filter(function(p) { return p.id !== id; }); renderPotongan(); calc(); }
+function renderPotongan() {
+  var list = document.getElementById('potongan-list'); list.innerHTML = '';
+  S.potongan.forEach(function(p) {
+    var d = document.createElement('div'); d.className = 'item-row';
+    d.innerHTML = '<input class="iname" type="text" placeholder="Nama potongan" value="' + p.name + '" oninput="updatePotN(' + p.id + ',this.value)">' +
+      '<input class="iamt" type="number" placeholder="0.00" value="' + (p.amount || '') + '" min="0" step="10" oninput="updatePotA(' + p.id + ',this.value)">' +
+      '<button class="btn-rm" onclick="removePotongan(' + p.id + ')">&#x00D7;</button>';
+    list.appendChild(d);
+  });
+}
+function updatePotN(id, v) { var p = S.potongan.find(function(x) { return x.id === id; }); if (p) p.name = v; }
+function updatePotA(id, v) { var p = S.potongan.find(function(x) { return x.id === id; }); if (p) { p.amount = parseFloat(v) || 0; calc(); } }
+
+// ========== KWSP ==========
+function calcKWSP(gross) {
+  var above60 = (S.age === 'above60');
+  var citizen = (S.citizen === 'citizen');
+  var pr = (S.citizen === 'pr');
+  var foreign = (S.citizen === 'foreign');
+  var empAmt = 0, emplrAmt = 0, empLbl = '0%', emplrLbl = '—';
+
+  // Employee
+  var isEmpZero = (S.epfOpt === 'zero') || (above60 && citizen);
+  if (isEmpZero) {
+    empAmt = 0;
+    empLbl = (above60 && citizen) ? '0% (60+ WN)' : '0% (Dikecualikan)';
+  } else {
+    var empR;
+    if (above60) { empR = (S.epfOpt === 'red') ? 0.03 : 0.055; }
+    else { empR = (S.epfOpt === 'red') ? 0.09 : 0.11; }
+    empAmt = Math.ceil(gross * empR);
+    empLbl = (empR * 100) + '%';
+  }
+
+  // Employer
+  if (foreign) {
+    emplrAmt = 5;
+    emplrLbl = 'RM5 (flat)';
+  } else if (above60 && citizen) {
+    emplrAmt = Math.ceil(gross * 0.04);
+    emplrLbl = '4%';
+  } else if (above60 && pr) {
+    var r = (gross <= 5000) ? 0.065 : 0.06;
+    emplrAmt = Math.ceil(gross * r);
+    emplrLbl = (gross <= 5000) ? '6.5%' : '6%';
+  } else {
+    var r2 = (gross <= 5000) ? 0.13 : 0.12;
+    emplrAmt = Math.ceil(gross * r2);
+    emplrLbl = (gross <= 5000) ? '13%' : '12%';
+  }
+
+  return { emp: empAmt, emplr: emplrAmt, label: empLbl + ' / ' + emplrLbl };
+}
+
+// ========== SOCSO – exact table from Akta 4 PDF ==========
+// Verified: RM4,100 -> pekerja=20.25, majikan=70.85
+var ST = [
+  [30,0.10,0.40],[50,0.20,0.70],[70,0.30,1.10],[100,0.40,1.50],
+  [140,0.60,2.10],[200,0.85,2.95],[300,1.25,4.35],[400,1.75,6.15],
+  [500,2.25,7.85],[600,2.75,9.65],[700,3.25,11.35],[800,3.75,13.15],
+  [900,4.25,14.85],[1000,4.75,16.65],[1100,5.25,18.35],[1200,5.75,20.15],
+  [1300,6.25,21.85],[1400,6.75,23.65],[1500,7.25,25.35],[1600,7.75,27.15],
+  [1700,8.25,28.85],[1800,8.75,30.65],[1900,9.25,32.35],[2000,9.75,34.15],
+  [2100,10.25,35.85],[2200,10.75,37.65],[2300,11.25,39.35],[2400,11.75,41.15],
+  [2500,12.25,42.85],[2600,12.75,44.65],[2700,13.25,46.35],[2800,13.75,48.15],
+  [2900,14.25,49.85],[3000,14.75,51.65],[3100,15.25,53.35],[3200,15.75,55.15],
+  [3300,16.25,56.85],[3400,16.75,58.65],[3500,17.25,60.35],[3600,17.75,62.15],
+  [3700,18.25,63.85],[3800,18.75,65.65],[3900,19.25,67.35],[4000,19.75,69.15],
+  [4100,20.25,70.85],[4200,20.75,72.65],[4300,21.25,74.35],[4400,21.75,76.15],
+  [4500,22.25,77.85],[4600,22.75,79.65],[4700,23.25,81.35],[4800,23.75,83.15],
+  [4900,24.25,84.85],[5000,24.75,86.65],[5100,25.25,88.35],[5200,25.75,90.15],
+  [5300,26.25,91.85],[5400,26.75,93.65],[5500,27.25,95.35],[5600,27.75,97.15],
+  [5700,28.25,98.85],[5800,28.75,100.65],[5900,29.25,102.35],[6000,29.75,104.15]
+];
+function calcSOCSO(g) {
+  if (g <= 0) return { emp: 0, emplr: 0 };
+  for (var i = 0; i < ST.length; i++) { if (g <= ST[i][0]) return { emp: ST[i][1], emplr: ST[i][2] }; }
+  return { emp: 29.75, emplr: 104.15 };
+}
+
+// ========== EIS – 0.2% each, ceiling RM4,000 ==========
+// EIS table from Rate of Contribution Employment Insurance System (Act 800)
+// Format: [wage_ceiling, employer_contribution, employee_contribution]
+// Row 1:  ≤30        → 0.05, 0.05   Row 2:  ≤50        → 0.10, 0.10
+// Row 3:  ≤70        → 0.15, 0.15   Row 4:  ≤100       → 0.20, 0.20
+// Row 5:  ≤140       → 0.25, 0.25   Row 6:  ≤200       → 0.35, 0.35
+// Row 7:  ≤300       → 0.50, 0.50   Row 8:  ≤400       → 0.70, 0.70
+// Row 9:  ≤500       → 0.90, 0.90   Row 10: ≤600       → 1.10, 1.10
+// Row 11: ≤700       → 1.30, 1.30   Row 12: ≤800       → 1.50, 1.50
+// Row 13: ≤900       → 1.70, 1.70   Row 14: ≤1000      → 1.90, 1.90
+// Row 15: ≤1100      → 2.10, 2.10   Row 16: ≤1200      → 2.30, 2.30
+// Row 17: ≤1300      → 2.50, 2.50   Row 18: ≤1400      → 2.70, 2.70
+// Row 19: ≤1500      → 2.90, 2.90   Row 20: ≤1600      → 3.10, 3.10
+// Row 21: ≤1700      → 3.30, 3.30   Row 22: ≤1800      → 3.50, 3.50
+// Row 23: ≤1900      → 3.70, 3.70   Row 24: ≤2000      → 3.90, 3.90
+// Row 25: ≤2100      → 4.10, 4.10   Row 26: ≤2200      → 4.30, 4.30
+// Row 27: ≤2300      → 4.50, 4.50   Row 28: ≤2400      → 4.70, 4.70
+// Row 29: ≤2500      → 4.90, 4.90   Row 30: ≤2600      → 5.10, 5.10
+// Row 31: ≤2700      → 5.30, 5.30   Row 32: ≤2800      → 5.50, 5.50
+// Row 33: ≤2900      → 5.70, 5.70   Row 34: ≤3000      → 5.90, 5.90
+// Row 35: ≤3100      → 6.10, 6.10   Row 36: ≤3200      → 6.30, 6.30
+// Row 37: ≤3300      → 6.50, 6.50   Row 38: ≤3400      → 6.70, 6.70
+// Row 39: ≤3500      → 6.90, 6.90   Row 40: ≤3600      → 7.10, 7.10
+// Row 41: ≤3700      → 7.30, 7.30   Row 42: ≤3800      → 7.50, 7.50
+// Row 43: ≤3900      → 7.70, 7.70   Row 44: ≤4000      → 7.90, 7.90
+// Row 45: ≤4100      → 8.10, 8.10   Row 46: ≤4200      → 8.30, 8.30
+// Row 47: ≤4300      → 8.50, 8.50   Row 48: ≤4400      → 8.70, 8.70
+// Row 49: ≤4500      → 8.90, 8.90   Row 50: ≤4600      → 9.10, 9.10
+// Row 51: ≤4700      → 9.30, 9.30   Row 52: ≤4800      → 9.50, 9.50
+// Row 53: ≤4900      → 9.70, 9.70   Row 54: ≤5000      → 9.90, 9.90
+// Row 55: ≤5100      → 10.10,10.10  Row 56: ≤5200      → 10.30,10.30
+// Row 57: ≤5300      → 10.50,10.50  Row 58: ≤5400      → 10.70,10.70
+// Row 59: ≤5500      → 10.90,10.90  Row 60: ≤5600      → 11.10,11.10
+// Row 61: ≤5700      → 11.30,11.30  Row 62: ≤5800      → 11.50,11.50
+// Row 63: ≤5900      → 11.70,11.70  Row 64: ≤6000      → 11.90,11.90
+// Row 65: >6000      → 11.90,11.90  (wages exceed RM6,000 capped at RM6,000 rate)
+var ET = [
+  [30,0.05,0.05],[50,0.10,0.10],[70,0.15,0.15],[100,0.20,0.20],
+  [140,0.25,0.25],[200,0.35,0.35],[300,0.50,0.50],[400,0.70,0.70],
+  [500,0.90,0.90],[600,1.10,1.10],[700,1.30,1.30],[800,1.50,1.50],
+  [900,1.70,1.70],[1000,1.90,1.90],[1100,2.10,2.10],[1200,2.30,2.30],
+  [1300,2.50,2.50],[1400,2.70,2.70],[1500,2.90,2.90],[1600,3.10,3.10],
+  [1700,3.30,3.30],[1800,3.50,3.50],[1900,3.70,3.70],[2000,3.90,3.90],
+  [2100,4.10,4.10],[2200,4.30,4.30],[2300,4.50,4.50],[2400,4.70,4.70],
+  [2500,4.90,4.90],[2600,5.10,5.10],[2700,5.30,5.30],[2800,5.50,5.50],
+  [2900,5.70,5.70],[3000,5.90,5.90],[3100,6.10,6.10],[3200,6.30,6.30],
+  [3300,6.50,6.50],[3400,6.70,6.70],[3500,6.90,6.90],[3600,7.10,7.10],
+  [3700,7.30,7.30],[3800,7.50,7.50],[3900,7.70,7.70],[4000,7.90,7.90],
+  [4100,8.10,8.10],[4200,8.30,8.30],[4300,8.50,8.50],[4400,8.70,8.70],
+  [4500,8.90,8.90],[4600,9.10,9.10],[4700,9.30,9.30],[4800,9.50,9.50],
+  [4900,9.70,9.70],[5000,9.90,9.90],[5100,10.10,10.10],[5200,10.30,10.30],
+  [5300,10.50,10.50],[5400,10.70,10.70],[5500,10.90,10.90],[5600,11.10,11.10],
+  [5700,11.30,11.30],[5800,11.50,11.50],[5900,11.70,11.70],[6000,11.90,11.90]
+];
+function calcEIS(g) {
+  if (g <= 0) return { emp: 0, emplr: 0 };
+  // No ceiling cap mentioned in Act 800 table — row 65 states ">RM6,000" uses same rate as RM6,000
+  for (var i = 0; i < ET.length; i++) { if (g <= ET[i][0]) return { emp: ET[i][1], emplr: ET[i][2] }; }
+  return { emp: 11.90, emplr: 11.90 }; // >RM6,000 → same as row 65
+}
+
+// ========== PCB 2024 – CORRECTED ==========
+// Verified: gross=4100, single, kwsp=451 → taxable=36200 → annual tax=672 → monthly=56 ✓
+// Formula: tax = base_tax_at_lower + (taxable_income - lower_bound) * rate
+var PB = [
+  { lo: 0,       hi: 5000,    base: 0,      rate: 0.00 },
+  { lo: 5000,    hi: 20000,   base: 0,      rate: 0.01 },
+  { lo: 20000,   hi: 35000,   base: 150,    rate: 0.03 },
+  { lo: 35000,   hi: 50000,   base: 600,    rate: 0.06 },
+  { lo: 50000,   hi: 70000,   base: 1500,   rate: 0.11 },
+  { lo: 70000,   hi: 100000,  base: 3700,   rate: 0.19 },
+  { lo: 100000,  hi: 400000,  base: 9400,   rate: 0.25 },
+  { lo: 400000,  hi: 600000,  base: 84400,  rate: 0.26 },
+  { lo: 600000,  hi: 2000000, base: 136400, rate: 0.28 },
+  { lo: 2000000, hi: Infinity,base: 528400, rate: 0.30 }
+];
+function annualTax(ti) {
+  if (ti <= 0) return 0;
+  for (var i = PB.length - 1; i >= 0; i--) {
+    if (ti > PB[i].lo) {
+      return PB[i].base + (ti - PB[i].lo) * PB[i].rate;
+    }
+  }
+  return 0;
+}
+// LHDN Table 1 – MTD bands with B already netting off the RM400/RM800 rebate
+// B(Cat1&3): rebate RM400 applied where P<=35000; B(Cat2): rebate RM800
+// Source: PCB 2026 Computerized Calculation Specification, Table 1
+var MTD_TABLE = [
+  { lo:     0, hi:   5000, M:       0, R: 0.00, B1:    0, B2:    0 },
+  { lo:  5000, hi:  20000, M:    5000, R: 0.01, B1: -400, B2: -800 },
+  { lo: 20000, hi:  35000, M:   20000, R: 0.03, B1: -250, B2: -650 },
+  { lo: 35000, hi:  50000, M:   35000, R: 0.06, B1:  600, B2:  600 },
+  { lo: 50000, hi:  70000, M:   50000, R: 0.11, B1: 1500, B2: 1500 },
+  { lo: 70000, hi: 100000, M:   70000, R: 0.19, B1: 3700, B2: 3700 },
+  { lo:100000, hi: 400000, M:  100000, R: 0.25, B1: 9400, B2: 9400 },
+  { lo:400000, hi: 600000, M:  400000, R: 0.26, B1:84400, B2:84400 },
+  { lo:600000, hi:2000000, M:  600000, R: 0.28, B1:136400,B2:136400},
+  { lo:2000000,hi:Infinity,M: 2000000, R: 0.30, B1:528400,B2:528400}
+];
+
+function calcPCB(annGross, epfEmpMonthly, marital, kids, okuKids) {
+  // --- Step 1: EPF relief via K1/K2 formula (LHDN spec) ---
+  // K2 = lower of [ (4000 - K1) / n ] or K1, truncated to 2dp
+  var EPF_LIMIT = 4000;
+  var n = 11; // remaining months after current month (month 1 of year)
+  var K1 = Math.min(epfEmpMonthly, EPF_LIMIT);
+  var K2 = Math.min(Math.floor(((EPF_LIMIT - K1) / n) * 100) / 100, K1);
+  var epfRelief = Math.min(K1 + K2 * n, EPF_LIMIT);
+
+  // --- Step 2: Chargeable income P ---
+  var relief = 9000; // D: individual relief
+  if (marital === 'married_alone') relief += 4000; // S: spouse relief (Cat 2)
+  relief += kids * 2000;   // QC: qualifying children
+  relief += okuKids * 6000;
+  relief += epfRelief;
+  var P = Math.max(0, annGross - relief);
+
+  // --- Step 3: MTD = [(P - M)*R + B] / (n+1) per Table 1 ---
+  // Category: Cat2 = married_alone, Cat1&3 = everything else
+  var isCat2 = (marital === 'married_alone');
+  var band = MTD_TABLE[0];
+  for (var i = MTD_TABLE.length - 1; i >= 0; i--) {
+    if (P > MTD_TABLE[i].lo) { band = MTD_TABLE[i]; break; }
+  }
+  var B = isCat2 ? band.B2 : band.B1;
+  var annTax = (P - band.M) * band.R + B;
+  // MTD for month 1 (X=0, Z=0): annTax / (n+1) = annTax / 12
+  var mtd = Math.max(0, annTax) / (n + 1);
+
+  return { taxable: P, annTax: Math.max(0, annTax), mtd: mtd, relief: relief };
+}
+
+// ========== CHART ==========
+var salaryChart = null;
+var lastResults = null;
+
+function initChart() {
+  var ctx = document.getElementById('salaryChart').getContext('2d');
+  salaryChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: [],
+        borderColor: 'transparent',
+        hoverOffset: 6,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              var val = ctx.parsed;
+              var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+              var pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+              return ' RM ' + val.toFixed(2) + ' (' + pct + '%)';
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function updateChart(r) {
+  if (!salaryChart || !r) return;
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+  var items = [];
+  if (r.net > 0) items.push({ label: 'Gaji Bersih', val: r.net, color: isDark ? '#e8703a' : '#c8521a' });
+  if (r.kwspEmp > 0) items.push({ label: 'KWSP', val: r.kwspEmp, color: '#2d7a4f' });
+  if (r.socsoEmp > 0) items.push({ label: 'SOCSO', val: r.socsoEmp, color: '#1a5c8a' });
+  if (r.eisEmp > 0) items.push({ label: 'EIS', val: r.eisEmp, color: '#3a7ec8' });
+  if (r.pcb > 0) items.push({ label: 'PCB/MTD', val: r.pcb, color: '#8a1a1a' });
+  if (r.zakat > 0) items.push({ label: 'Zakat', val: r.zakat, color: '#5c3a8a' });
+  if (r.other > 0) items.push({ label: 'Potongan Lain', val: r.other, color: '#888' });
+
+  if (items.length === 0) {
+    items = [{ label: 'Tiada data', val: 1, color: isDark ? '#333028' : '#e8e3d9' }];
+  }
+
+  salaryChart.data.labels = items.map(function(i) { return i.label; });
+  salaryChart.data.datasets[0].data = items.map(function(i) { return i.val; });
+  salaryChart.data.datasets[0].backgroundColor = items.map(function(i) { return i.color; });
+  salaryChart.update();
+
+  // Legend
+  var leg = document.getElementById('chart-legend');
+  var total = items.reduce(function(a, i) { return a + i.val; }, 0);
+  leg.innerHTML = items.map(function(item) {
+    var pct = total > 0 ? ((item.val / total) * 100).toFixed(1) : '0.0';
+    return '<div class="legend-item">' +
+      '<div class="legend-dot" style="background:' + item.color + '"></div>' +
+      '<span>' + item.label + ' <span style="color:var(--text3)">(' + pct + '%)</span></span>' +
+      '<span class="legend-val">RM ' + item.val.toFixed(2) + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+// ========== FORMAT ==========
+function fmt(n) {
+  if (isNaN(n) || n === undefined) return 'RM 0.00';
+  return 'RM ' + Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+function pct(n) { return n.toFixed(2) + '%'; }
+function el(id) { return document.getElementById(id); }
+function set(id, v) { var e = el(id); if (e) e.textContent = v; }
+
+// ========== MAIN CALCULATION ==========
+function calc() {
+  var salary = parseFloat(el('salary').value) || 0;
+  var elaunSum = S.elauns.reduce(function(a, e) { return a + (e.amount || 0); }, 0);
+  var gross = salary + elaunSum;
+  var potSum = S.potongan.reduce(function(a, p) { return a + (p.amount || 0); }, 0);
+  var marital = el('marital').value;
+  var kids = parseInt(el('children').value) || 0;
+  var okuKids = parseInt(el('childrenOku').value) || 0;
+  var nisab = parseFloat(el('nisab').value) || 8200;
+  var zakatRate = parseFloat(el('zakatRate').value) || 2.5;
+  var stEl = el('state');
+  var stateName = stEl.options[stEl.selectedIndex].text;
+
+  set('gross-display', fmt(gross));
+
+  // --- KWSP ---
+  var kwsp = calcKWSP(gross);
+
+  // --- SOCSO + EIS ---
+  var socsoEmp = 0, socsoEmplr = 0, eisEmp = 0, eisEmplr = 0, socsoNote = '';
+
+  if (S.citizen === 'foreign') {
+    socsoNote = 'Bukan warganegara – tiada caruman SOCSO/EIS.';
+  } else if (S.age === 'below60') {
+    var sData = calcSOCSO(gross);
+    if (S.includeSocso) {
+      socsoEmp = sData.emp;
+    } else {
+      socsoNote = 'SOCSO pekerja dimatikan. ';
+    }
+    socsoEmplr = sData.emplr;
+    var eData = calcEIS(gross);
+    if (S.includeEis) {
+      eisEmp = eData.emp;
+    } else {
+      socsoNote += 'EIS pekerja dimatikan.';
+    }
+    eisEmplr = eData.emplr;
+    if (gross > 6000 && (S.includeSocso || S.includeEis)) {
+      socsoNote = (socsoNote ? socsoNote + ' ' : '') + 'Gaji >RM6,000 – SOCSO dikira pada kadar RM6,000.';
+    }
+  } else {
+    var sData2 = calcSOCSO(gross);
+    socsoEmplr = sData2.emplr;
+    socsoNote = 'Umur 60+: syer majikan SOCSO sahaja. Tiada syer pekerja & EIS.';
+  }
+
+  // --- PCB ---
+  var annGross = gross * 12;
+  var pcbRes = calcPCB(annGross, kwsp.emp, marital, kids, okuKids);
+  var pcbAnn = pcbRes.annTax;
+  var pcbMthRaw = parseFloat(pcbRes.mtd.toFixed(2));
+  // Per LHDN spec: if MTD < RM10, employer not required to deduct
+  var pcbBelow10 = (pcbMthRaw > 0 && pcbMthRaw < 10);
+  var pcbMth = pcbBelow10 && !S.forcePcbBelow10 ? 0 : pcbMthRaw;
+  var effRate = pcbRes.taxable > 0 ? (pcbAnn / pcbRes.taxable * 100) : 0;
+
+  // --- ZAKAT ---
+  var zakatMth = 0, zakatAnn = 0, zakatLiable = false;
+  if (S.includeZakatCalc) {
+    var zakatBase = gross;
+    if (S.deductEpf) zakatBase -= kwsp.emp;
+    if (S.deductSocso) zakatBase -= (socsoEmp + eisEmp);
+    var annZakat = Math.max(0, zakatBase) * 12;
+    if (S.muslim && annZakat >= nisab) {
+      zakatLiable = true;
+      zakatAnn = parseFloat((annZakat * (zakatRate / 100)).toFixed(2));
+      zakatMth = parseFloat((zakatAnn / 12).toFixed(2));
+    }
+  }
+
+  // --- Totals ---
+  var totalMandatory = kwsp.emp + socsoEmp + eisEmp + pcbMth + ((S.muslim && S.includeZakatCalc) ? zakatMth : 0);
+  var netSalary = gross - totalMandatory - potSum;
+
+  // Store for chart
+  lastResults = {
+    net: Math.max(0, netSalary),
+    kwspEmp: kwsp.emp,
+    socsoEmp: socsoEmp,
+    eisEmp: eisEmp,
+    pcb: pcbMth,
+    zakat: (S.muslim && S.includeZakatCalc) ? zakatMth : 0,
+    other: potSum
+  };
+
+  // ===== DOM UPDATE =====
+  set('net-salary', fmt(netSalary));
+  set('h-gross', fmt(gross));
+  set('h-mandatory', fmt(totalMandatory));
+  set('h-other', fmt(potSum));
+
+  set('kwsp-emp-h', fmt(kwsp.emp));
+  set('kwsp-emp', fmt(kwsp.emp));
+  set('kwsp-emplr', fmt(kwsp.emplr));
+  set('kwsp-rate', kwsp.label);
+  set('kwsp-total', fmt(kwsp.emp + kwsp.emplr));
+
+  set('perkeso-emp-h', fmt(socsoEmp + eisEmp));
+  set('socso-emp', fmt(socsoEmp));
+  set('socso-emplr', fmt(socsoEmplr));
+  set('eis-emp', fmt(eisEmp));
+  set('eis-emplr', fmt(eisEmplr));
+  set('socso-note', socsoNote.trim());
+
+  set('pcb-monthly', fmt(pcbMth));
+  set('pcb-tax-a', fmt(pcbRes.taxable));
+  set('pcb-annual', fmt(pcbAnn));
+  set('pcb-monthly2', fmt(pcbMthRaw));
+  set('pcb-eff', pct(effRate));
+  set('pcb-relief-note', 'Relief tahunan: RM' + pcbRes.relief.toLocaleString('en-MY') + ' (peribadi RM9,000 + KWSP + tanggungan)');
+
+  // Below-RM10 notice
+  var below10Notice = el('pcb-below10-notice');
+  var forceDesc = el('pcb-force-desc');
+  var forceTogBtn = el('tog-force-pcb');
+  if (gross > 0 && pcbBelow10) {
+    below10Notice.style.display = 'block';
+    forceTogBtn.classList.toggle('on', S.forcePcbBelow10);
+    forceDesc.textContent = S.forcePcbBelow10
+      ? 'Ya — potong RM' + pcbMthRaw.toFixed(2) + ' setiap bulan (pilihan majikan)'
+      : 'Tidak — ikut peraturan LHDN (tiada potongan bulanan)';
+  } else {
+    below10Notice.style.display = 'none';
+    if (!pcbBelow10) S.forcePcbBelow10 = false;
+  }
+
+  // PCB threshold notice
+  var pcbNote = el('pcb-threshold-note');
+  if (gross > 0 && pcbMth === 0) {
+    // Thresholds (annual gross) below which PCB = 0, per LHDN table
+    // Bujang/Cat1&3 (0 kids): RM37,333/yr = RM3,111/bln
+    // Berkahwin berasingan + 2 anak: RM41,333/yr = RM3,444/bln
+    // Berkahwin bersama (Cat2) + 0 anak: RM48,000/yr = RM4,000/bln
+    // Berkahwin bersama + 1 anak: RM50,000/yr = RM4,167/bln
+    // Berkahwin bersama + 2 anak: RM52,000/yr = RM4,333/bln
+    var thresholdRows = [
+      { label: 'Bujang / Janda / Duda',              annual: 37333, monthly: 3111 },
+      { label: 'Berkahwin berasingan + 0 anak',       annual: 37333, monthly: 3111 },
+      { label: 'Berkahwin berasingan + 2 anak',       annual: 41333, monthly: 3444 },
+      { label: 'Berkahwin bersama + 0 anak',          annual: 48000, monthly: 4000 },
+      { label: 'Berkahwin bersama + 1 anak',          annual: 50000, monthly: 4167 },
+      { label: 'Berkahwin bersama + 2 anak',          annual: 52000, monthly: 4333 },
+    ];
+    var isCat2 = (marital === 'married_alone');
+    var threshAnn = isCat2
+      ? (kids === 0 ? 48000 : kids === 1 ? 50000 : 48000 + kids * 2000)
+      : (37333 + kids * 2000);
+    var threshMth = Math.round(threshAnn / 12);
+    var tableRows = thresholdRows.map(function(r) {
+      return '<tr><td style="padding:3px 8px 3px 0">' + r.label + '</td>' +
+             '<td style="padding:3px 8px;text-align:right;font-family:\'DM Mono\',monospace">RM ' + r.annual.toLocaleString('en-MY') + '</td>' +
+             '<td style="padding:3px 0 3px 8px;text-align:right;font-family:\'DM Mono\',monospace">RM ' + r.monthly.toLocaleString('en-MY') + '</td></tr>';
+    }).join('');
+    pcbNote.style.display = 'block';
+    pcbNote.innerHTML =
+      '<div style="font-weight:700;margin-bottom:6px">✓ Tiada PCB — Pendapatan Di Bawah Had Bercukai</div>' +
+      '<div style="margin-bottom:8px">Pendapatan anda (selepas KWSP &amp; relief) belum mencapai amaun bercukai. ' +
+      'PCB mula dikenakan apabila gaji kasar bulanan melebihi kira-kira <b>RM ' + threshMth.toLocaleString('en-MY') + '</b> ' +
+      'bagi kategori anda.</div>' +
+      '<div style="font-weight:700;margin-bottom:5px;font-size:10px;letter-spacing:.5px;text-transform:uppercase">Had Pendapatan Tidak Bercukai (Rujukan)</div>' +
+      '<table style="width:100%;font-size:10px;border-collapse:collapse">' +
+        '<tr style="opacity:.7"><td style="padding:2px 8px 4px 0;font-weight:700">Kategori</td>' +
+        '<td style="padding:2px 8px 4px;text-align:right;font-weight:700">Tahunan (RM)</td>' +
+        '<td style="padding:2px 0 4px 8px;text-align:right;font-weight:700">Bulanan (RM)</td></tr>' +
+        tableRows +
+      '</table>';
+  } else {
+    pcbNote.style.display = 'none';
+    pcbNote.innerHTML = '';
+  }
+
+  // Zakat
+  set('zakat-state-lbl', stateName);
+  var zb = el('zakat-body');
+  if (!S.includeZakatCalc) {
+    // zakat card already hidden by togZakatCalc; nothing to update
+  } else if (!S.muslim) {
+    zb.innerHTML = '<div class="zakat-nil">Tidak berkenaan (Non-Muslim)</div>';
+    el('s-zakat-row').style.display = 'none';
+  } else if (gross <= 0) {
+    zb.innerHTML = '<div class="zakat-nil">Masukkan gaji untuk mengira zakat.</div>';
+    el('s-zakat-row').style.display = 'none';
+  } else if (!zakatLiable) {
+    var diff = nisab - annZakat;
+    zb.innerHTML = '<div class="zakat-notice info">&#8505;&#65039; <div>Pendapatan bersih tahunan <b>' + fmt(annZakat) + '</b> belum mencapai nisab <b>' + fmt(nisab) + '</b> (kurang <b>' + fmt(diff) + '</b>). Tidak wajib bayar zakat pendapatan.</div></div>';
+    el('s-zakat-row').style.display = 'none';
+  } else {
+    var dStr = '';
+    if (S.deductEpf) dStr += ' &#8722; KWSP ' + fmt(kwsp.emp);
+    if (S.deductSocso) dStr += ' &#8722; PERKESO ' + fmt(socsoEmp + eisEmp);
+    zb.innerHTML =
+      '<div class="zakat-notice ok">&#10003; <div>Pendapatan bersih tahunan <b>' + fmt(annZakat) + '</b> melebihi nisab <b>' + fmt(nisab) + '</b>. Anda <b>WAJIB</b> membayar zakat pendapatan.</div></div>' +
+      '<div class="zakat-boxes">' +
+        '<div class="zakat-box"><div class="zakat-box-label">Zakat Tahunan</div><div class="zakat-box-val">' + fmt(zakatAnn) + '</div><div class="zakat-box-desc">' + zakatRate + '% &times; ' + fmt(annZakat) + '</div></div>' +
+        '<div class="zakat-box"><div class="zakat-box-label">Zakat Bulanan</div><div class="zakat-box-val">' + fmt(zakatMth) + '</div><div class="zakat-box-desc">&#247; 12 bulan</div></div>' +
+      '</div>' +
+      '<div class="zakat-calc"><b>Pengiraan:</b> (' + fmt(gross) + dStr + ') &times; 12 = ' + fmt(annZakat) + ' &times; ' + zakatRate + '% = ' + fmt(zakatAnn) + ' &divide; 12 = <b>' + fmt(zakatMth) + '/bulan</b></div>';
+    el('s-zakat-row').style.display = 'flex';
+    set('s-zakat', fmt(zakatMth));
+  }
+
+  set('s-kwsp', fmt(kwsp.emp));
+  set('s-socso', fmt(socsoEmp));
+  set('s-eis', fmt(eisEmp));
+  set('s-pcb', fmt(pcbMth));
+  set('s-total', fmt(totalMandatory));
+  el('s-socso-row').style.display = 'flex';
+  el('s-eis-row').style.display = 'flex';
+
+  if (potSum > 0) {
+    el('other-card').style.display = '';
+    set('other-total', fmt(potSum));
+    var ob = el('other-body'); ob.innerHTML = '';
+    S.potongan.forEach(function(p) {
+      ob.innerHTML += '<div class="dr"><div class="dr-label">' + (p.name || 'Potongan') + '</div><div class="dr-val">' + fmt(p.amount) + '</div></div>';
+    });
+    el('s-other-row').style.display = 'flex';
+    set('s-other', fmt(potSum));
+  } else {
+    el('other-card').style.display = 'none';
+    el('s-other-row').style.display = 'none';
+  }
+
+  updateChart(lastResults);
+}
+
+// ========== SELECT2 INIT ==========
+function initSelect2() {
+  $('#marital').select2({ minimumResultsForSearch: Infinity, width: '100%' });
+  $('#state').select2({ width: '100%' });
+  // Wire up change events
+  $('#marital').on('change', function() { calc(); });
+  $('#state').on('change', function() { calc(); });
+}
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded', function() {
+  // Apply stored theme to buttons
+  var savedTheme = localStorage.getItem('kiragaji-theme') || 'light';
+  document.getElementById('btn-light').classList.toggle('active', savedTheme === 'light');
+  document.getElementById('btn-dark').classList.toggle('active', savedTheme === 'dark');
+
+  initSelect2();
+  initChart();
+  updateHint();
+  el('salary').focus();
+  calc();
+});
+</script>
+</body>
+</html>
