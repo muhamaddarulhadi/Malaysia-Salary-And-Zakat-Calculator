@@ -71,7 +71,7 @@ Dicipta oleh **M.D.Hadi** — [github.com/muhamaddarulhadi](https://github.com/m
 ### 🌙 Zakat Pendapatan
 - Sokongan 16 negeri dengan pihak berkuasa zakat masing-masing:
   - Selangor (LZS), W.P. Kuala Lumpur (MAIWP), W.P. Putrajaya (MAIWP)
-  - W.P. Labuan (MZWPL), Johor (MZAJ), Kedah, Kelantan (MAIK)
+  - W.P. Labuan (MZWPL), Johor (MZAJ), Kedah (LZNK), Kelantan (MAIK)
   - Melaka, Negeri Sembilan (MAINS), Pahang (PAIP)
   - Pulau Pinang (MAINPP), Perak (MAIAMP), Perlis (MAIPs)
   - Sabah (MUIS), Sarawak (Baitulmal), Terengganu (MAIDAM)
@@ -272,7 +272,7 @@ Kira Gaji boleh dipasang sebagai aplikasi penuh pada peranti anda:
 
 ## Lesen
 
-© 2025 M.D.Hadi. Hak cipta terpelihara.
+©  M.D.Hadi. Hak cipta terpelihara.
 
 ---
 
