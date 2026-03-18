@@ -1,6 +1,6 @@
 const CACHE = 'kiragaji-v2';
 const ASSETS = [
-  './malaysia-salary-calculator.html',
+  './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
