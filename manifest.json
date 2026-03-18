@@ -2,7 +2,7 @@
   "name": "Kira Gaji",
   "short_name": "Kira Gaji",
   "description": "Kalkulator gaji Malaysia – KWSP, SOCSO, EIS, PCB, Zakat",
-  "start_url": "./malaysia-salary-calculator.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f0ece4",
