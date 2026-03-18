@@ -491,7 +491,7 @@ select option{background:var(--card);color:var(--text)}
     <div class="dc-head">
       <div class="dc-badge">
         <div class="dc-dot d-pcb"></div>
-        <div><div class="dc-name c-pcb">PCB / MTD</div><div class="dc-sub">Potongan Cukai Bulanan – LHDN 2024</div></div>
+        <div><div class="dc-name c-pcb">PCB / MTD</div><div class="dc-sub">Potongan Cukai Bulanan – LHDN</div></div>
       </div>
       <div class="dc-amt c-pcb" id="pcb-monthly">RM 0.00</div>
     </div>
@@ -558,7 +558,7 @@ select option{background:var(--card);color:var(--text)}
 </div><!-- end right -->
 
 <div class="disclaimer">
-  ⚠️ <b>Kira Gaji</b> adalah alat anggaran sahaja. KWSP berdasarkan Jadual Ketiga (Akta 452). SOCSO berdasarkan Kadar Caruman Akta 4 (jadual tepat). PCB berdasarkan jadual cukai LHDN 2024 dengan relief standard. Nilai nisab zakat berbeza mengikut negeri &amp; semasa. Bukan nasihat kewangan profesional.
+  ⚠️ <b>Kira Gaji</b> adalah alat anggaran sahaja. KWSP berdasarkan Jadual Ketiga (Akta 452). SOCSO berdasarkan Kadar Caruman Akta 4 (jadual tepat). PCB berdasarkan jadual cukai LHDN dengan relief standard. Nilai nisab zakat berbeza mengikut negeri &amp; semasa. Bukan nasihat kewangan profesional.
 </div>
 
 </div><!-- end main -->
@@ -894,7 +894,7 @@ function calcEIS(g) {
   return { emp: 11.90, emplr: 11.90 }; // >RM6,000 → same as row 65
 }
 
-// ========== PCB 2024 – CORRECTED ==========
+// ========== PCB – CORRECTED ==========
 // Verified: gross=4100, single, kwsp=451 → taxable=36200 → annual tax=672 → monthly=56 ✓
 // Formula: tax = base_tax_at_lower + (taxable_income - lower_bound) * rate
 var PB = [
